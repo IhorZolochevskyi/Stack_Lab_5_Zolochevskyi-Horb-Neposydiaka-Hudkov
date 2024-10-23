@@ -1,0 +1,26 @@
+﻿@model IEnumerable<lab5.Models.Car>
+
+@{
+    ViewData["Title"] = "Список машин";
+}
+<h2>Список машин</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Марка</th>
+            <th>Модель</th>
+            <th>Цена за день</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var car in Model)
+        {
+                <tr>
+                    <td>@car.brand</td>
+                    <td>@car.model</td>
+                    <td>@car.pricePerDay</td>
+                </tr>
+        }
+    </tbody>
+</table>

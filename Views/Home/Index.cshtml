@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <button id="loadClients" class="btn btn-primary">Показать всех клиентов</button>
+    <button id="loadCars" class="btn btn-primary">Показать все машины</button>
+    <button id="loadDocuments" class="btn btn-primary">Показать все документы</button>
+</div>
+
+<div id="result" class="mt-4"></div>
+
+@section Scripts {
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#loadClients').click(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetAllClients", "carRent")',
+                        type: 'GET',
+                        success: function (data) {
+                            let html = '<h2>Список клиентов</h2><table class="table"><thead><tr><th>Имя</th><th>Возраст</th></tr></thead><tbody>';
+                            $.each(data, function (index, client) {
+                                html += '<tr><td>' + client.name + '</td><td>' + client.age + '</td></tr>';
+                            });
+                            html += '</tbody></table>';
+                            $('#result').html(html);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                            $('#result').html('<p>Ошибка загрузки клиентов.</p>');
+                        }
+                    });
+                });
+
+                $('#loadCars').click(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetAllCars", "carRent")',
+                        type: 'GET',
+                        success: function (data) {
+                                let html = '<h2>Список машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Номер</th><th>Цена за день</th></tr></thead><tbody>';
+                            $.each(data, function (index, car) {
+                                    html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>'+ car.carNumber + '</td><td>' + car.pricePerDay + '</td></tr>';
+                            });
+                            html += '</tbody></table>';
+                            $('#result').html(html);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                            $('#result').html('<p>Ошибка загрузки машин.</p>');
+                        }
+                    });
+                });
+
+                $('#loadDocuments').click(function () {
+                    $.ajax({
+                        url: '@Url.Action("GetAllDocuments", "carRent")',
+                        type: 'GET',
+                        success: function (data) {
+                            let html = '<h2>Список документов</h2><table class="table"><thead><tr><th>Имя клиента</th><th>Марка машины</th><th>Модель машины</th></tr></thead><tbody>';
+                            $.each(data, function (index, document) {
+                                html += '<tr><td>' + document.client.name + '</td><td>' + document.car.brand + '</td><td>' + document.car.model + '</td></tr>';
+                            });
+                            html += '</tbody></table>';
+                            $('#result').html(html);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                            $('#result').html('<p>Ошибка загрузки документов.</p>');
+                        }
+                    });
+                });
+            });
+        </script>
+}

@@ -1,0 +1,23 @@
+﻿@model IEnumerable<lab5.Models.Document>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Клиент</th>
+            <th>Машина</th>
+            <th>Дата начала аренды</th>
+            <th>Дата окончания аренды</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var document in Model)
+        {
+                <tr>
+                    <td>@document.client?.name</td>
+                    <td>@document.car?.model (@document.car?.brand)</td>
+                    <td>@document.startDate</td>
+                    <td>@document.endDate</td>
+                </tr>
+        }
+    </tbody>
+</table>
