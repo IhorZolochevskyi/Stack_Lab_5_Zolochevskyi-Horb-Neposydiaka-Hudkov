@@ -39,5 +39,61 @@ namespace lab5.Controllers
             var documents = _db.Documents.ToList();
             return Json(documents);
         }
+        [HttpGet]
+        public JsonResult GetAvailableCarModels()
+        {
+            var availableCarModels = _db.Cars
+                .GroupBy(car => new { car.brand, car.model, car.pricePerDay })
+                .Select(group => new
+                {
+                    brand = group.Key.brand,   // Изменено на нижний регистр
+                    model = group.Key.model,   // Изменено на нижний регистр
+                    pricePerDay = group.Key.pricePerDay  // Изменено на нижний регистр
+                })
+                .ToList();
+
+            return Json(availableCarModels);
+        }
+        [HttpPost]
+        public IActionResult AddClient(string Name, int age)
+        {
+            if (string.IsNullOrEmpty(Name) || age <= 0)
+            {
+                return BadRequest("Неверные данные клиента.");
+            }
+
+            Client client = new Client
+            {
+                name = Name,
+                age = age
+            };
+
+            _db.Clients.Add(client);
+            _db.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult AddCar(string brand, string model, string carNumber, decimal pricePerDay)
+        {
+            if (string.IsNullOrEmpty(brand) || string.IsNullOrEmpty(model) || string.IsNullOrEmpty(carNumber) || pricePerDay <= 0)
+            {
+                return BadRequest("Неверные данные машины.");
+            }
+
+            Car car = new Car
+            {
+                brand = brand,
+                model = model,
+                carNumber = carNumber,
+                pricePerDay = pricePerDay
+            };
+
+            _db.Cars.Add(car);
+            _db.SaveChanges();
+
+            return Ok();
+        }
     }
 }

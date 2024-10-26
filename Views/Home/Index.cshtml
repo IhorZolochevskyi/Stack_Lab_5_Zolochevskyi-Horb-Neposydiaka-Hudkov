@@ -6,70 +6,206 @@
     <button id="loadClients" class="btn btn-primary">Показать всех клиентов</button>
     <button id="loadCars" class="btn btn-primary">Показать все машины</button>
     <button id="loadDocuments" class="btn btn-primary">Показать все документы</button>
+    <button id="loadAvailableCarModels" class="btn btn-primary">Показать доступные модели машин</button>
 </div>
 
 <div id="result" class="mt-4"></div>
 
 @section Scripts {
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                $('#loadClients').click(function () {
-                    $.ajax({
-                        url: '@Url.Action("GetAllClients", "carRent")',
-                        type: 'GET',
-                        success: function (data) {
-                            let html = '<h2>Список клиентов</h2><table class="table"><thead><tr><th>Имя</th><th>Возраст</th></tr></thead><tbody>';
-                            $.each(data, function (index, client) {
-                                html += '<tr><td>' + client.name + '</td><td>' + client.age + '</td></tr>';
-                            });
-                            html += '</tbody></table>';
-                            $('#result').html(html);
-                        },
-                        error: function (xhr, status, error) {
-                            console.error(error);
-                            $('#result').html('<p>Ошибка загрузки клиентов.</p>');
-                        }
-                    });
-                });
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function appendActionButtons() {
+                return `
+                            <div class="mt-3" id="actionButtons">
+                                <button class="btn btn-success" id="addClientButton">Добавить клиента</button>
+                                <button class="btn btn-success" id="addCarButton">Добавить машину</button>
+                                <button class="btn btn-warning" onclick="editItem()">Изменить</button>
+                                <button class="btn btn-danger" onclick="deleteItem()">Удалить</button>
+                            </div>
+                        `;
+            }
 
-                $('#loadCars').click(function () {
-                    $.ajax({
-                        url: '@Url.Action("GetAllCars", "carRent")',
-                        type: 'GET',
-                        success: function (data) {
-                                let html = '<h2>Список машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Номер</th><th>Цена за день</th></tr></thead><tbody>';
-                            $.each(data, function (index, car) {
-                                    html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>'+ car.carNumber + '</td><td>' + car.pricePerDay + '</td></tr>';
-                            });
-                            html += '</tbody></table>';
-                            $('#result').html(html);
-                        },
-                        error: function (xhr, status, error) {
-                            console.error(error);
-                            $('#result').html('<p>Ошибка загрузки машин.</p>');
-                        }
-                    });
-                });
+            function showAddClientForm() {
+                $('#addCarForm').remove(); // Убираем форму добавления машины, если она есть
+                $('#addClientForm').remove(); // Убираем предыдущую форму, если она уже есть
 
-                $('#loadDocuments').click(function () {
-                    $.ajax({
-                        url: '@Url.Action("GetAllDocuments", "carRent")',
-                        type: 'GET',
-                        success: function (data) {
-                            let html = '<h2>Список документов</h2><table class="table"><thead><tr><th>Имя клиента</th><th>Марка машины</th><th>Модель машины</th></tr></thead><tbody>';
-                            $.each(data, function (index, document) {
-                                html += '<tr><td>' + document.client.name + '</td><td>' + document.car.brand + '</td><td>' + document.car.model + '</td></tr>';
-                            });
-                            html += '</tbody></table>';
-                            $('#result').html(html);
-                        },
-                        error: function (xhr, status, error) {
-                            console.error(error);
-                            $('#result').html('<p>Ошибка загрузки документов.</p>');
-                        }
-                    });
+                const formHtml = `
+                            <div id="addClientForm" class="mt-3">
+                                <h4>Добавить клиента</h4>
+                                <input type="text" id="clientName" class="form-control mb-2" placeholder="Имя">
+                                <input type="number" id="clientAge" class="form-control mb-2" placeholder="Возраст">
+                                <button class="btn btn-primary" onclick="submitClient()">Сохранить</button>
+                            </div>
+                        `;
+                $('#actionButtons').after(formHtml);
+            }
+
+            function showAddCarForm() {
+                $('#addClientForm').remove(); // Убираем форму добавления клиента, если она есть
+                $('#addCarForm').remove(); // Убираем предыдущую форму, если она уже есть
+
+                const formHtml = `
+                            <div id="addCarForm" class="mt-3">
+                                <h4>Добавить машину</h4>
+                                <input type="text" id="carBrand" class="form-control mb-2" placeholder="Марка">
+                                <input type="text" id="carModel" class="form-control mb-2" placeholder="Модель">
+                                <input type="text" id="carNumber" class="form-control mb-2" placeholder="Номер">
+                                <input type="number" id="carPrice" class="form-control mb-2" placeholder="Цена за день">
+                                <button class="btn btn-primary" onclick="submitCar()">Сохранить</button>
+                            </div>
+                        `;
+                $('#actionButtons').after(formHtml);
+            }
+
+            $('#loadClients').click(function () {
+                $.ajax({
+                    url: '@Url.Action("GetAllClients", "carRent")',
+                    type: 'GET',
+                    success: function (data) {
+                        let html = '<h2>Список клиентов</h2><table class="table"><thead><tr><th>Имя</th><th>Возраст</th></tr></thead><tbody>';
+                        $.each(data, function (index, client) {
+                            html += '<tr><td>' + client.name + '</td><td>' + client.age + '</td></tr>';
+                        });
+                        html += '</tbody></table>';
+                        html += appendActionButtons();
+                        $('#result').html(html);
+
+                        // Добавляем событие для кнопки "Добавить клиента" после загрузки HTML
+                        $('#addClientButton').click(showAddClientForm);
+                        $('#addCarButton').remove(); // Убираем кнопку "Добавить машину"
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        $('#result').html('<p>Ошибка загрузки клиентов.</p>');
+                    }
                 });
             });
-        </script>
+
+            $('#loadCars').click(function () {
+                $.ajax({
+                    url: '@Url.Action("GetAllCars", "carRent")',
+                    type: 'GET',
+                    success: function (data) {
+                        let html = '<h2>Список машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Номер</th><th>Цена за день</th></tr></thead><tbody>';
+                        $.each(data, function (index, car) {
+                            html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>' + car.carNumber + '</td><td>' + car.pricePerDay + '</td></tr>';
+                        });
+                        html += '</tbody></table>';
+                        html += appendActionButtons();
+                        $('#result').html(html);
+
+                        // Добавляем событие для кнопки "Добавить машину" после загрузки HTML
+                        $('#addCarButton').click(showAddCarForm);
+                        $('#addClientButton').remove(); // Убираем кнопку "Добавить клиента"
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        $('#result').html('<p>Ошибка загрузки машин.</p>');
+                    }
+                });
+            });
+
+            // Функция для добавления клиента
+            window.submitClient = function () {
+                const name = $('#clientName').val();
+                const age = $('#clientAge').val();
+
+                if (!name || !age) {
+                    alert("Пожалуйста, заполните все поля.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddClient", "carRent")', // URL метода AddClient
+                    type: 'POST',
+                    data: {
+                        Name: name,
+                        age: age
+                    },
+                    success: function () {
+                        alert("Клиент успешно добавлен!");
+                        $('#addClientForm').remove(); // Убираем форму после успешного добавления
+                        $('#loadClients').click(); // Обновляем список клиентов
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Ошибка при добавлении клиента: ", error);
+                        alert("Не удалось добавить клиента.");
+                    }
+                });
+            };
+
+            // Функция для добавления машины
+            window.submitCar = function () {
+                const brand = $('#carBrand').val();
+                const model = $('#carModel').val();
+                const carNumber = $('#carNumber').val();
+                const pricePerDay = $('#carPrice').val();
+
+                if (!brand || !model || !carNumber || !pricePerDay) {
+                    alert("Пожалуйста, заполните все поля.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddCar", "carRent")', // URL метода AddCar
+                    type: 'POST',
+                    data: {
+                        brand: brand,
+                        model: model,
+                        carNumber: carNumber,
+                        pricePerDay: pricePerDay
+                    },
+                    success: function () {
+                        alert("Машина успешно добавлена!");
+                        $('#addCarForm').remove(); // Убираем форму после успешного добавления
+                        $('#loadCars').click(); // Обновляем список машин
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Ошибка при добавлении машины: ", error);
+                        alert("Не удалось добавить машину.");
+                    }
+                });
+            };
+
+            $('#loadDocuments').click(function () {
+                $.ajax({
+                    url: '@Url.Action("GetAllDocuments", "carRent")',
+                    type: 'GET',
+                    success: function (data) {
+                        let html = '<h2>Список документов</h2><table class="table"><thead><tr><th>Имя клиента</th><th>Марка машины</th><th>Модель машины</th></tr></thead><tbody>';
+                        $.each(data, function (index, document) {
+                            html += '<tr><td>' + document.client.name + '</td><td>' + document.car.brand + '</td><td>' + document.car.model + '</td></tr>';
+                        });
+                        html += '</tbody></table>';
+                        html += appendActionButtons();
+                        $('#result').html(html);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        $('#result').html('<p>Ошибка загрузки документов.</p>');
+                    }
+                });
+            });
+
+            $('#loadAvailableCarModels').click(function () {
+                $.ajax({
+                    url: '@Url.Action("GetAvailableCarModels", "carRent")',
+                    type: 'GET',
+                    success: function (data) {
+                        let html = '<h2>Доступные модели машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Цена за день</th></tr></thead><tbody>';
+                        $.each(data, function (index, car) {
+                            html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>' + car.pricePerDay + '</td></tr>';
+                        });
+                        html += '</tbody></table>';
+                        $('#result').html(html);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        $('#result').html('<p>Ошибка загрузки доступных моделей машин.</p>');
+                    }
+                });
+            });
+        });
+    </script>
 }
