@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Data;
 
 namespace lab5.Models
 {
@@ -31,7 +30,7 @@ namespace lab5.Models
                         carNumber = "KA1234KA",
                         pricePerDay = 99
                     }
-                ); 
+                );
 
                 context.SaveChanges();
             }
@@ -41,13 +40,46 @@ namespace lab5.Models
                 context.Clients.AddRange(
                     new Client
                     {
-                       name = "Kiril",
-                       age = 19
+                        name = "Kiril",
+                        age = 19
                     },
                     new Client
                     {
                         name = "Ihor",
                         age = 20
+                    }
+                );
+
+                context.SaveChanges();
+            }
+
+            // Добавление документов, если они еще не существуют
+            if (!context.Documents.Any())
+            {
+                var clients = context.Clients.ToList();
+                var cars = context.Cars.ToList();
+
+                context.Documents.AddRange(
+                    new Document
+                    {
+                        client = clients[0], // "Kiril"
+                        car = cars[0], // "Audi A6"
+                        startDate = DateTime.Now,
+                        endDate = DateTime.Now.AddDays(3)
+                    },
+                    new Document
+                    {
+                        client = clients[1], // "Ihor"
+                        car = cars[1], // "BMW X5"
+                        startDate = DateTime.Now,
+                        endDate = DateTime.Now.AddDays(5)
+                    },
+                    new Document
+                    {
+                        client = clients[0], // "Kiril"
+                        car = cars[2], // "BMW X5" (второй экземпляр)
+                        startDate = DateTime.Now,
+                        endDate = DateTime.Now.AddDays(7)
                     }
                 );
 

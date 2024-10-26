@@ -34,9 +34,21 @@ namespace lab5.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetAllDocuments()
+        public IActionResult GetAllDocuments()
         {
-            var documents = _db.Documents.ToList();
+            var documents = _db.Documents
+                .Include(d => d.client)
+                .Include(d => d.car)
+                .Select(d => new
+                {
+                    id = d.Id,
+                    client = d.client,
+                    car = d.car,
+                    startDate = d.startDate,
+                    endDate = d.endDate
+                })
+                .ToList();
+
             return Json(documents);
         }
         [HttpGet]
