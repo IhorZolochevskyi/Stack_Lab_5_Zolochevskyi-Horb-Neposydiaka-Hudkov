@@ -3,10 +3,10 @@
 }
 
 <div class="text-center">
-    <button id="loadClients" class="btn btn-primary">Показать всех клиентов</button>
-    <button id="loadCars" class="btn btn-primary">Показать все машины</button>
-    <button id="loadDocuments" class="btn btn-primary">Показать все документы</button>
-    <button id="loadAvailableCarModels" class="btn btn-primary">Показать доступные модели машин</button>
+    <button id="loadParks" class="btn btn-primary">Показати усі парки</button>
+    <button id="loadPlantings" class="btn btn-primary">Показати усі насадження</button>
+    <button id="loadFountains" class="btn btn-primary">Показати усі фонтани</button>
+    <button id="loadPavilions" class="btn btn-primary">Показати усі павільони</button>
 </div>
 
 <div id="result" class="mt-4"></div>
@@ -15,204 +15,305 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
-            function appendActionButtons() {
+            function appendActionButtons(section) {
                 return `
-                                    <div class="mt-3" id="actionButtons">
-                                        <button class="btn btn-success" id="addClientButton">Добавить клиента</button>
-                                        <button class="btn btn-success" id="addCarButton">Добавить машину</button>
-                                        <button class="btn btn-warning" onclick="editItem()">Изменить</button>
-                                        <button class="btn btn-danger" onclick="deleteItem()">Удалить</button>
-                                    </div>
-                                `;
+                            <div class="mt-3" id="actionButtons">
+                                ${section === 'parks' ? '<button class="btn btn-success" id="addParkButton">Додати парк</button>' : ''}
+                                ${section === 'plantings' ? '<button class="btn btn-success" id="addPlantingButton">Додати насадження</button>' : ''}
+                                ${section === 'fountains' ? '<button class="btn btn-success" id="addFountainButton">Додати фонтан</button>' : ''}
+                                ${section === 'pavilions' ? '<button class="btn btn-success" id="addPavilionButton">Додати павільон</button>' : ''}
+                                <button class="btn btn-warning" onclick="editItem()">Змінити</button>
+                                <button class="btn btn-danger" onclick="deleteItem()">Видалити</button>
+                            </div>
+                        `;
             }
 
-            function showAddClientForm() {
-                $('#addCarForm').remove(); // Убираем форму добавления машины, если она есть
-                $('#addClientForm').remove(); // Убираем предыдущую форму, если она уже есть
-
+            function showAddParkForm() {
+                $('#addParkForm').remove();
                 const formHtml = `
-                                    <div id="addClientForm" class="mt-3">
-                                        <h4>Добавить клиента</h4>
-                                        <input type="text" id="clientName" class="form-control mb-2" placeholder="Имя">
-                                        <input type="number" id="clientAge" class="form-control mb-2" placeholder="Возраст">
-                                        <button class="btn btn-primary" onclick="submitClient()">Сохранить</button>
-                                    </div>
-                                `;
+                            <div id="addParkForm" class="mt-3">
+                                <h4>Додати парк</h4>
+                                <input type="text" id="parkName" class="form-control mb-2" placeholder="Назва парку">
+                                <input type="number" id="parkSquare" class="form-control mb-2" placeholder="Площа">
+                                <input type="text" id="parkLocation" class="form-control mb-2" placeholder="Локація">
+                                <button class="btn btn-primary" onclick="submitPark()">Зберегти</button>
+                            </div>
+                        `;
                 $('#actionButtons').after(formHtml);
             }
 
-            function showAddCarForm() {
-                $('#addClientForm').remove(); // Убираем форму добавления клиента, если она есть
-                $('#addCarForm').remove(); // Убираем предыдущую форму, если она уже есть
-
+            function showAddPlantingForm() {
+                $('#addPlantingForm').remove();
                 const formHtml = `
-                                    <div id="addCarForm" class="mt-3">
-                                        <h4>Добавить машину</h4>
-                                        <input type="text" id="carBrand" class="form-control mb-2" placeholder="Марка">
-                                        <input type="text" id="carModel" class="form-control mb-2" placeholder="Модель">
-                                        <input type="text" id="carNumber" class="form-control mb-2" placeholder="Номер">
-                                        <input type="number" id="carPrice" class="form-control mb-2" placeholder="Цена за день">
-                                        <button class="btn btn-primary" onclick="submitCar()">Сохранить</button>
-                                    </div>
-                                `;
+                            <div id="addPlantingForm" class="mt-3">
+                                <h4>Додати насадження</h4>
+                                <input type="number" id="parkId" class="form-control mb-2" placeholder="ID парка">
+                                <input type="text" id="cultureType" class="form-control mb-2" placeholder="Тип культури">
+                                <input type="text" id="plantingName" class="form-control mb-2" placeholder="Ім'я насадження">
+                                <input type="number" id="averageLifetime" class="form-control mb-2" placeholder="Середня тривалість життя">
+                                <input type="number" id="quantity" class="form-control mb-2" placeholder="Кількість">
+                                <button class="btn btn-primary" onclick="submitPlanting()">Зберегти</button>
+                            </div>
+                        `;
                 $('#actionButtons').after(formHtml);
             }
 
-            $('#loadClients').click(function () {
+            function showAddFountainForm() {
+                $('#addFountainForm').remove();
+                const formHtml = `
+                            <div id="addFountainForm" class="mt-3">
+                                <h4>Додати фонтан</h4>
+                                <input type="number" id="fountainParkId" class="form-control mb-2" placeholder="ID парка">
+                                <input type="number" id="fountainCode" class="form-control mb-2" placeholder="Код">
+                                <input type="date" id="buildDate" class="form-control mb-2" placeholder="Дата побудови">
+                                <input type="number" id="maxWaterConsumption" class="form-control mb-2" placeholder="Максимальна витрата води">
+                                <input type="number" id="normalWaterConsumption" class="form-control mb-2" placeholder="Нормальна витрата води">
+                                <input type="number" id="fountainSquare" class="form-control mb-2" placeholder="Площа">
+                                <button class="btn btn-primary" onclick="submitFountain()">Зберегти</button>
+                            </div>
+                        `;
+                $('#actionButtons').after(formHtml);
+            }
+
+            function showAddPavilionForm() {
+                $('#addPavilionForm').remove();
+                const formHtml = `
+                            <div id="addPavilionForm" class="mt-3">
+                                <h4>Додати павільон</h4>
+                                <input type="number" id="pavilionParkId" class="form-control mb-2" placeholder="ID парка">
+                                <input type="text" id="pavilionName" class="form-control mb-2" placeholder="Назва павільону">
+                                <input type="text" id="pavilionType" class="form-control mb-2" placeholder="Тип павільону">
+                                <input type="number" id="pavilionSquare" class="form-control mb-2" placeholder="Площа">
+                                <button class="btn btn-primary" onclick="submitPavilion()">Зберегти</button>
+                            </div>
+                        `;
+                $('#actionButtons').after(formHtml);
+            }
+
+            function loadSection(section) {
+                let url;
+                let title;
+                let loadFunction;
+
+                switch (section) {
+                    case 'parks':
+                        url = '@Url.Action("GetAllParks", "Parks")';
+                        title = 'Список парків';
+                        loadFunction = showAddParkForm;
+                        break;
+                    case 'plantings':
+                        url = '@Url.Action("GetAllPlantings", "Parks")';
+                        title = 'Список насаджень';
+                        loadFunction = showAddPlantingForm;
+                        break;
+                    case 'fountains':
+                        url = '@Url.Action("GetAllFountains", "Parks")';
+                        title = 'Список фонтанів';
+                        loadFunction = showAddFountainForm;
+                        break;
+                    case 'pavilions':
+                        url = '@Url.Action("GetAllPavilions", "Parks")';
+                        title = 'Список павільонів';
+                        loadFunction = showAddPavilionForm;
+                        break;
+                }
+
                 $.ajax({
-                    url: '@Url.Action("GetAllClients", "carRent")',
+                    url: url,
                     type: 'GET',
                     success: function (data) {
-                        let html = '<h2>Список клиентов</h2><table class="table"><thead><tr><th>Имя</th><th>Возраст</th></tr></thead><tbody>';
-                        $.each(data, function (index, client) {
-                            html += '<tr><td>' + client.name + '</td><td>' + client.age + '</td></tr>';
+                        let html = `<h2>${title}</h2><table class="table"><thead><tr>`;
+                        // Динамічно створюємо заголовки таблиці в залежності від секції
+                        if (section === 'parks') {
+                            html += '<th>ID</th><th>Назва</th><th>Площа</th><th>Локація</th>';
+                        } else if (section === 'plantings') {
+                            html += '<th>ID</th><th>Тип культури</th><th>Ім\'я насадження</th><th>Середня тривалість життя</th><th>Кількість</th><th>Парк</th>';
+                        } else if (section === 'fountains') {
+                            html += '<th>ID</th><th>Код</th><th>Дата побудови</th><th>Максимальна витрата води</th><th>Нормальна витрата води</th><th>Площа</th><th>Парк</th>';
+                        } else if (section === 'pavilions') {
+                            html += '<th>ID</th><th>Ім\'я</th><th>Тип</th><th>Площа</th><th>Парк</th>';
+                        }
+                        html += '</tr></thead><tbody>';
+                        $.each(data, function (index, item) {
+                            html += '<tr>';
+                            if (section === 'parks') {
+                                html += `<td>${item.id}</td><td>${item.name}</td><td>${item.square}</td><td>${item.location}</td>`;
+                            } else if (section === 'plantings') {
+                                html += `<td>${item.id}</td><td>${item.cultureType}</td><td>${item.name}</td><td>${item.averageLifetime}</td><td>${item.quantity}</td><td>${item.parkName}</td>`;
+                            } else if (section === 'fountains') {
+                                html += `<td>${item.id}</td><td>${item.code}</td><td>${new Date(item.buildDate).toLocaleDateString()}</td><td>${item.maxWaterConsumption}</td><td>${item.normalWaterConsumption}</td><td>${item.square}</td><td>${item.parkName}</td>`;
+                            } else if (section === 'pavilions') {
+                                html += `<td>${item.id}</td><td>${item.name}</td><td>${item.type}</td><td>${item.square}</td><td>${item.parkName}</td>`;
+                            }
+                            html += '</tr>';
                         });
                         html += '</tbody></table>';
-                        html += appendActionButtons();
+                        html += appendActionButtons(section);
                         $('#result').html(html);
 
-                        // Добавляем событие для кнопки "Добавить клиента" после загрузки HTML
-                        $('#addClientButton').click(showAddClientForm);
-                        $('#addCarButton').remove(); // Убираем кнопку "Добавить машину"
+                        // Додаємо подію для відповідної кнопки "Додати"
+                        if (section === 'parks') {
+                            $('#addParkButton').click(showAddParkForm);
+                        } else if (section === 'plantings') {
+                            $('#addPlantingButton').click(showAddPlantingForm);
+                        } else if (section === 'fountains') {
+                            $('#addFountainButton').click(showAddFountainForm);
+                        } else if (section === 'pavilions') {
+                            $('#addPavilionButton').click(showAddPavilionForm);
+                        }
                     },
                     error: function (xhr, status, error) {
                         console.error(error);
-                        $('#result').html('<p>Ошибка загрузки клиентов.</p>');
+                        $('#result').html('<p>Помилка завантаження даних.</p>');
                     }
                 });
-            });
+            }
 
-            $('#loadCars').click(function () {
-                $.ajax({
-                    url: '@Url.Action("GetAllCars", "carRent")',
-                    type: 'GET',
-                    success: function (data) {
-                        let html = '<h2>Список машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Номер</th><th>Цена за день</th></tr></thead><tbody>';
-                        $.each(data, function (index, car) {
-                            html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>' + car.carNumber + '</td><td>' + car.pricePerDay + '</td></tr>';
-                        });
-                        html += '</tbody></table>';
-                        html += appendActionButtons();
-                        $('#result').html(html);
+            $('#loadParks').click(function () { loadSection('parks'); });
+            $('#loadPlantings').click(function () { loadSection('plantings'); });
+            $('#loadFountains').click(function () { loadSection('fountains'); });
+            $('#loadPavilions').click(function () { loadSection('pavilions'); });
 
-                        // Добавляем событие для кнопки "Добавить машину" после загрузки HTML
-                        $('#addCarButton').click(showAddCarForm);
-                        $('#addClientButton').remove(); // Убираем кнопку "Добавить клиента"
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#result').html('<p>Ошибка загрузки машин.</p>');
-                    }
-                });
-            });
+            window.submitPark = function () {
+                const name = $('#parkName').val();
+                const square = $('#parkSquare').val();
+                const location = $('#parkLocation').val();
 
-            // Функция для добавления клиента
-            window.submitClient = function () {
-                const name = $('#clientName').val();
-                const age = $('#clientAge').val();
-
-                if (!name || !age) {
-                    alert("Пожалуйста, заполните все поля.");
+                if (!name || !square || !location) {
+                    alert("Будь ласка, заповніть усі поля.");
                     return;
                 }
 
                 $.ajax({
-                    url: '@Url.Action("AddClient", "carRent")', // URL метода AddClient
+                    url: '@Url.Action("AddPark", "Parks")',
                     type: 'POST',
                     data: {
                         Name: name,
-                        age: age
+                        Square: square,
+                        Location: location
                     },
                     success: function () {
-                        alert("Клиент успешно добавлен!");
-                        $('#addClientForm').remove(); // Убираем форму после успешного добавления
-                        $('#loadClients').click(); // Обновляем список клиентов
+                        alert("Парк успішно доданий!");
+                        $('#addParkForm').remove();
+                        loadSection('parks'); // Виклик функції завантаження парків
                     },
                     error: function (xhr, status, error) {
-                        console.error("Ошибка при добавлении клиента: ", error);
-                        alert("Не удалось добавить клиента.");
+                        console.error("Помилка при додаванні парку: ", error);
+                        alert("Не вдалося додати парк.");
                     }
                 });
             };
 
-            // Функция для добавления машины
-            window.submitCar = function () {
-                const brand = $('#carBrand').val();
-                const model = $('#carModel').val();
-                const carNumber = $('#carNumber').val();
-                const pricePerDay = $('#carPrice').val();
+            window.submitPlanting = function () {
+                const parkId = $('#parkId').val();
+                const cultureType = $('#cultureType').val();
+                const plantingName = $('#plantingName').val();
+                const averageLifetime = $('#averageLifetime').val();
+                const quantity = $('#quantity').val();
 
-                if (!brand || !model || !carNumber || !pricePerDay) {
-                    alert("Пожалуйста, заполните все поля.");
+                if (!parkId || !cultureType || !plantingName || !averageLifetime || !quantity) {
+                    alert("Будь ласка, заповніть усі поля.");
                     return;
                 }
 
                 $.ajax({
-                    url: '@Url.Action("AddCar", "carRent")', // URL метода AddCar
+                    url: '@Url.Action("AddPlanting", "Parks")',
                     type: 'POST',
                     data: {
-                        brand: brand,
-                        model: model,
-                        carNumber: carNumber,
-                        pricePerDay: pricePerDay
+                        ParkId: parkId,
+                        CultureType: cultureType,
+                        Name: plantingName,
+                        AverageLifetime: averageLifetime,
+                        Quantity: quantity
                     },
                     success: function () {
-                        alert("Машина успешно добавлена!");
-                        $('#addCarForm').remove(); // Убираем форму после успешного добавления
-                        $('#loadCars').click(); // Обновляем список машин
+                        alert("Насадження успішно додано!");
+                        $('#addPlantingForm').remove();
+                        loadSection('plantings'); // Виклик функції завантаження насаджень
                     },
                     error: function (xhr, status, error) {
-                        console.error("Ошибка при добавлении машины: ", error);
-                        alert("Не удалось добавить машину.");
+                        console.error("Помилка при додаванні насадження: ", error);
+                        alert("Не вдалося додати насадження.");
                     }
                 });
             };
 
-            $('#loadDocuments').click(function () {
-                $.ajax({
-                    url: '@Url.Action("GetAllDocuments", "carRent")',
-                    type: 'GET',
-                    success: function (data) {
-                        let html = '<h2>Список документов</h2><table class="table"><thead><tr><th>ID</th><th>Имя клиента</th><th>Марка машины</th><th>Модель машины</th><th>Номер машины</th><th>Дата начала</th><th>Дата конца</th></tr></thead><tbody>';
-                        $.each(data, function (index, document) {
-                            html += '<tr>' +
-                                '<td>' + document.id + '</td>' + // ID документа
-                                '<td>' + document.client.name + '</td>' +
-                                '<td>' + document.car.brand + '</td>' +
-                                '<td>' + document.car.model + '</td>' +
-                                '<td>' + document.car.carNumber + '</td>' + // Номер машины
-                                '<td>' + new Date(document.startDate).toLocaleDateString() + '</td>' + // Дата начала
-                                '<td>' + new Date(document.endDate).toLocaleDateString() + '</td>' + // Дата конца
-                                '</tr>';
-                        });
-                        html += '</tbody></table>';
-                        $('#result').html(html);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#result').html('<p>Ошибка загрузки документов.</p>');
-                    }
-                });
-            });
+            window.submitFountain = function () {
+                const parkId = $('#fountainParkId').val();
+                const code = $('#fountainCode').val();
+                const buildDate = $('#buildDate').val();
+                const maxWaterConsumption = $('#maxWaterConsumption').val();
+                const normalWaterConsumption = $('#normalWaterConsumption').val();
+                const square = $('#fountainSquare').val();
 
-            $('#loadAvailableCarModels').click(function () {
+                if (!parkId || !code || !buildDate || !maxWaterConsumption || !normalWaterConsumption || !square) {
+                    alert("Будь ласка, заповніть усі поля.");
+                    return;
+                }
+
                 $.ajax({
-                    url: '@Url.Action("GetAvailableCarModels", "carRent")',
-                    type: 'GET',
-                    success: function (data) {
-                        let html = '<h2>Доступные модели машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th></tr></thead><tbody>';
-                        $.each(data, function (index, model) {
-                            html += '<tr><td>' + model.brand + '</td><td>' + model.model + '</td></tr>';
-                        });
-                        html += '</tbody></table>';
-                        $('#result').html(html);
+                    url: '@Url.Action("AddFountain", "Parks")',
+                    type: 'POST',
+                    data: {
+                        ParkId: parkId,
+                        Code: code,
+                        BuildDate: buildDate,
+                        MaxWaterConsumption: maxWaterConsumption,
+                        NormalWaterConsumption: normalWaterConsumption,
+                        Square: square
+                    },
+                    success: function () {
+                        alert("Фонтан успішно доданий!");
+                        $('#addFountainForm').remove();
+                        loadSection('fountains'); // Виклик функції завантаження фонтанів
                     },
                     error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#result').html('<p>Ошибка загрузки моделей машин.</p>');
+                        console.error("Помилка при додаванні фонтану: ", error);
+                        alert("Не вдалося додати фонтан.");
                     }
                 });
-            });
+            };
+
+            window.submitPavilion = function () {
+                const parkId = $('#pavilionParkId').val();
+                const name = $('#pavilionName').val();
+                const type = $('#pavilionType').val();
+                const square = $('#pavilionSquare').val();
+
+                if (!parkId || !name || !type || !square) {
+                    alert("Будь ласка, заповніть усі поля.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddPavilion", "Parks")',
+                    type: 'POST',
+                    data: {
+                        ParkId: parkId,
+                        Name: name,
+                        Type: type,
+                        Square: square
+                    },
+                    success: function () {
+                        alert("Павільон успішно доданий!");
+                        $('#addPavilionForm').remove();
+                        loadSection('pavilions'); // Виклик функції завантаження павільонів
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка при додаванні павільону: ", error);
+                        alert("Не вдалося додати павільон.");
+                    }
+                });
+            };
+
+            // Тут можна додати функції для редагування та видалення, якщо потрібно
+            window.editItem = function () {
+                alert("Функція редагування ще не реалізована.");
+            };
+
+            window.deleteItem = function () {
+                alert("Функція видалення ще не реалізована.");
+            };
         });
     </script>
 }

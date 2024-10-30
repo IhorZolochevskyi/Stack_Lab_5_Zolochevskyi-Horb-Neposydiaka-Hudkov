@@ -1,0 +1,26 @@
+﻿@model IEnumerable<lab5.Models.Park>
+
+@{
+    ViewData["Title"] = "Список парків";
+}
+<h2>Список парків</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Площа</th>
+            <th>Локація</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var park in Model)
+        {
+                <tr>
+                    <td>@park.Name</td>
+                    <td>@park.Square</td>
+                    <td>@park.Location</td>
+                </tr>
+        }
+    </tbody>
+</table>

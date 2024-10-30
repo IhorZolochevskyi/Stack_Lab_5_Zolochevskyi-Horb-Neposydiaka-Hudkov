@@ -24,7 +24,7 @@ namespace lab5
                 try
                 {
                     // Получаем контекст базы данных и инициализируем его
-                    var context = services.GetRequiredService<carRentContext>();
+                    var context = services.GetRequiredService<ParksContext>();
                     SampleData.Initialize(context);
                 }
                 catch (Exception ex)
@@ -50,7 +50,7 @@ namespace lab5
                         string connection = context.Configuration.GetConnectionString("DefaultConnection");
 
                         // Добавление контекста базы данных и контроллеров с представлениями
-                        services.AddDbContext<carRentContext>(options => options.UseSqlServer(connection));
+                        services.AddDbContext<ParksContext>(options => options.UseSqlServer(connection));
                         services.AddControllersWithViews();
                     })
                     .Configure(app =>
