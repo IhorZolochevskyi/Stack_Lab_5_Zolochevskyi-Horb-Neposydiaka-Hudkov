@@ -26,6 +26,17 @@ namespace lab5.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetParkById(int id)
+        {
+            var park = _db.Parks.FirstOrDefault(p => p.Id == id);
+            if (park == null)
+            {
+                return NotFound();
+            }
+            return Json(park);
+        }
+
+        [HttpGet]
         public JsonResult GetAllPlantings()
         {
             var plantings = _db.Plantings.Include(p => p.Park).ToList();
@@ -38,6 +49,17 @@ namespace lab5.Controllers
                 p.Quantity,
                 ParkName = p.Park != null ? p.Park.Name : "Unknown"
             }));
+        }
+
+        [HttpGet]
+        public IActionResult GetPlantingById(int id)
+        {
+            var planting = _db.Plantings.FirstOrDefault(p => p.Id == id);
+            if (planting == null)
+            {
+                return NotFound();
+            }
+            return Json(planting);
         }
 
         [HttpGet]
@@ -57,6 +79,17 @@ namespace lab5.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetFountainById(int id)
+        {
+            var fountain = _db.Fountains.FirstOrDefault(p => p.Id == id);
+            if (fountain == null)
+            {
+                return NotFound();
+            }
+            return Json(fountain);
+        }
+
+        [HttpGet]
         public JsonResult GetAllPavilions()
         {
             var pavilions = _db.Pavilions.Include(p => p.Park).ToList();
@@ -68,6 +101,17 @@ namespace lab5.Controllers
                 p.Square,
                 ParkName = p.Park != null ? p.Park.Name : "Unknown"
             }));
+        }
+
+        [HttpGet]
+        public IActionResult GetPavilionById(int id)
+        {
+            var pavilion = _db.Pavilions.FirstOrDefault(p => p.Id == id);
+            if (pavilion == null)
+            {
+                return NotFound();
+            }
+            return Json(pavilion);
         }
 
         [HttpPost]
@@ -92,6 +136,21 @@ namespace lab5.Controllers
         }
 
         [HttpPost]
+        public IActionResult ChangeParks(int parkId, string name, decimal square, string location)
+        {
+            var park = _db.Parks.FirstOrDefault(p => p.Id == parkId);
+            if (park == null)
+            {
+                return NotFound();
+            }
+            park.Name = name;
+            park.Square = square;
+            park.Location = location;
+            _db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPost]
         public IActionResult AddPlanting(int parkId, string cultureType, string name, int averageLifetime, int quantity)
         {
             if (parkId <= 0 || string.IsNullOrEmpty(cultureType) || string.IsNullOrEmpty(name) || averageLifetime <= 0 || quantity <= 0)
@@ -111,6 +170,22 @@ namespace lab5.Controllers
             _db.Plantings.Add(planting);
             _db.SaveChanges();
 
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult ChangePlanting(int plantingId, string cultureType, string name, int averageLifetime, int quantity)
+        {
+            var planting = _db.Plantings.FirstOrDefault(p => p.Id == plantingId);
+            if (planting == null)
+            {
+                return NotFound();
+            }
+            planting.CultureType = cultureType;
+            planting.Name = name;
+            planting.AverageLifetime = averageLifetime;
+            planting.Quantity = quantity;
+            _db.SaveChanges();
             return Ok();
         }
 
@@ -139,6 +214,23 @@ namespace lab5.Controllers
         }
 
         [HttpPost]
+        public IActionResult ChangeFountain(int fountainId, int code, DateTime buildDate, decimal maxWaterConsumption, decimal normalWaterConsumption, decimal square)
+        {
+            var fountain = _db.Fountains.FirstOrDefault(p => p.Id == fountainId);
+            if (fountain == null)
+            {
+                return NotFound();
+            }
+            fountain.Code = code;
+            fountain.BuildDate = buildDate;
+            fountain.MaxWaterConsumption = maxWaterConsumption;
+            fountain.NormalWaterConsumption = normalWaterConsumption;
+            fountain.Square = square;
+            _db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPost]
         public IActionResult AddPavilion(int parkId, string name, string type, decimal square)
         {
             if (parkId <= 0 || string.IsNullOrEmpty(name) || string.IsNullOrEmpty(type) || square <= 0)
@@ -157,6 +249,21 @@ namespace lab5.Controllers
             _db.Pavilions.Add(pavilion);
             _db.SaveChanges();
 
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult ChangePavilion(int pavilionId, string name, string type, decimal square)
+        {
+            var pavilion = _db.Pavilions.FirstOrDefault(p => p.Id == pavilionId);
+            if (pavilion == null)
+            {
+                return NotFound();
+            }
+            pavilion.Name = name;
+            pavilion.Type = type;
+            pavilion.Square = square;
+            _db.SaveChanges();
             return Ok();
         }
     }

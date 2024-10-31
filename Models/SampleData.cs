@@ -11,21 +11,18 @@ namespace lab5.Models
                 context.Parks.AddRange(
                     new Park
                     {
-                        Id = 1,
                         Name = "Central Park",
                         Square = 1000,
                         Location = "New York"
                     },
                     new Park
                     {
-                        Id = 2,
                         Name = "Hyde Park",
                         Square = 2000,
                         Location = "London"
                     },
                     new Park
                     {
-                        Id = 3,
                         Name = "Tuileries Garden",
                         Square = 3000,
                         Location = "Paris"
