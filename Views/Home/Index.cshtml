@@ -137,15 +137,19 @@
                             if (section === 'parks') {
                                 html += `<td>${item.id}</td><td>${item.name}</td><td>${item.square}</td><td>${item.location}</td>`;
                                 html += `<td><button class="btn btn-warning" onclick="showEditParkForm(${item.id})">Змінити</button></td>`;
+                                html += `<td><button class="btn btn-danger" onclick="deletePark(${item.id})">Видалити</button></td>`;
                             } else if (section === 'plantings') {
                                 html += `<td>${item.id}</td><td>${item.cultureType}</td><td>${item.name}</td><td>${item.averageLifetime}</td><td>${item.quantity}</td><td>${item.parkName}</td>`;
                                 html += `<td><button class="btn btn-warning" onclick="showEditPlantingForm(${item.id})">Змінити</button></td>`;
+                                html += `<td><button class="btn btn-danger" onclick="deletePlanting(${item.id})">Видалити</button></td>`;
                             } else if (section === 'fountains') {
                                 html += `<td>${item.id}</td><td>${item.code}</td><td>${new Date(item.buildDate).toLocaleDateString()}</td><td>${item.maxWaterConsumption}</td><td>${item.normalWaterConsumption}</td><td>${item.square}</td><td>${item.parkName}</td>`;
-                                html += `<td><button class="btn btn-warning" onclick="showEditParkForm(${item.id})">Змінити</button></td>`;
+                                html += `<td><button class="btn btn-warning" onclick="showEditFountainForm(${item.id})">Змінити</button></td>`;
+                                html += `<td><button class="btn btn-danger" onclick="deleteFountain(${item.id})">Видалити</button></td>`;
                             } else if (section === 'pavilions') {
                                 html += `<td>${item.id}</td><td>${item.name}</td><td>${item.type}</td><td>${item.square}</td><td>${item.parkName}</td>`;
-                                html += `<td><button class="btn btn-warning" onclick="showEditParkForm(${item.id})">Змінити</button></td>`;
+                                html += `<td><button class="btn btn-warning" onclick="showEditPavilionForm(${item.id})">Змінити</button></td>`;
+                                html += `<td><button class="btn btn-danger" onclick="deletePavilion(${item.id})">Видалити</button></td>`;
                             }
                             html += '</tr>';
                         });
@@ -244,7 +248,7 @@
                 }
 
                 $.ajax({
-                    url: '@Url.Action("ChangeParks", "Parks")',
+                    url: '@Url.Action("ChangePark", "Parks")',
                     type: 'POST',
                     data: {
                         ParkId: parkId,
@@ -262,6 +266,24 @@
                         alert("Не вдалося змінити парк.");
                     }
                 });
+            };
+
+            window.deletePark = function (parkId) {
+                if (confirm("Ви впевнені, що хочете видалити цей парк?")) {
+                    $.ajax({
+                        url: '@Url.Action("DeletePark", "Parks")',
+                        type: 'POST',
+                        data: { id: parkId },
+                        success: function () {
+                            alert("Парк успішно видалено!");
+                            loadSection('parks');
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Помилка при видаленні парку: ", error);
+                            alert("Не вдалося видалити парк.");
+                        }
+                    });
+                }
             };
 
 
@@ -363,6 +385,24 @@
             });
         };
 
+            window.deletePlanting = function (plantingId) {
+                if (confirm("Ви впевнені, що хочете видалити це насадження?")) {
+                    $.ajax({
+                        url: '@Url.Action("DeletePlanting", "Parks")',
+                        type: 'POST',
+                        data: { id: plantingId },
+                        success: function () {
+                            alert("Насадження успішно видалено!");
+                            loadSection('plantings');
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Помилка при видаленні насадження: ", error);
+                            alert("Не вдалося видалити насадження.");
+                        }
+                    });
+                }
+            };
+
             window.submitFountain = function () {
                 const parkId = $('#fountainParkId').val();
                 const code = $('#fountainCode').val();
@@ -399,6 +439,90 @@
                 });
             };
 
+            window.showEditFountainForm = function (fountainId) {
+                $.ajax({
+                    url: `@Url.Action("GetFountainById", "Parks")?id=${fountainId}`,
+                    type: 'GET',
+                    success: function (data) {
+                        $('#editFountainForm').remove();
+                        const formHtml = `
+                        <div id="editFountainForm" class="mt-3">
+                            <h4>Редагувати фонтан</h4>
+                            <input type="hidden" id="editFountainId" value="${data.id}">
+                            <input type="number" id="editFountainParkId" class="form-control mb-2" value="${data.parkId}" placeholder="ID парка">
+                            <input type="number" id="editFountainCode" class="form-control mb-2" value="${data.code}" placeholder="Код">
+                            <input type="date" id="editBuildDate" class="form-control mb-2" value="${new Date(data.buildDate).toISOString().split('T')[0]}">
+                            <input type="number" id="editMaxWaterConsumption" class="form-control mb-2" value="${data.maxWaterConsumption}" placeholder="Максимальна витрата води">
+                            <input type="number" id="editNormalWaterConsumption" class="form-control mb-2" value="${data.normalWaterConsumption}" placeholder="Нормальна витрата води">
+                            <input type="number" id="editFountainSquare" class="form-control mb-2" value="${data.square}" placeholder="Площа">
+                            <button class="btn btn-primary" onclick="submitEditFountain()">Зберегти зміни</button>
+                        </div>
+                    `;
+                        $('#result').append(formHtml);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка отримання даних фонтану: ", error);
+                        alert("Не вдалося завантажити дані фонтану.");
+                    }
+                });
+            };
+
+            window.submitEditFountain = function () {
+                const fountainId = $('#editFountainId').val();
+                const parkId = $('#editFountainParkId').val();
+                const code = $('#editFountainCode').val();
+                const buildDate = $('#editBuildDate').val();
+                const maxWaterConsumption = $('#editMaxWaterConsumption').val();
+                const normalWaterConsumption = $('#editNormalWaterConsumption').val();
+                const square = $('#editFountainSquare').val();
+
+                if (!fountainId || !parkId || !code || !buildDate || !maxWaterConsumption || !normalWaterConsumption || !square) {
+                    alert("Будь ласка, заповніть усі поля.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ChangeFountain", "Parks")',
+                    type: 'POST',
+                    data: {
+                        FountainId: fountainId,
+                        ParkId: parkId,
+                        Code: code,
+                        BuildDate: buildDate,
+                        MaxWaterConsumption: maxWaterConsumption,
+                        NormalWaterConsumption: normalWaterConsumption,
+                        Square: square
+                    },
+                    success: function () {
+                        alert("Фонтан успішно змінено!");
+                        $('#editFountainForm').remove();
+                        loadSection('fountains');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка при зміні фонтану: ", error);
+                        alert("Не вдалося змінити фонтан.");
+                    }
+                });
+            };
+
+            window.deleteFountain = function (fountainId) {
+                if (confirm("Ви впевнені, що хочете видалити цей фонтан?")) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteFountain", "Parks")',
+                        type: 'POST',
+                        data: { id: fountainId },
+                        success: function () {
+                            alert("Фонтан успішно видалено!");
+                            loadSection('fountains');
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Помилка при видаленні фонтану: ", error);
+                            alert("Не вдалося видалити фонтан.");
+                        }
+                    });
+                }
+            };
+
             window.submitPavilion = function () {
                 const parkId = $('#pavilionParkId').val();
                 const name = $('#pavilionName').val();
@@ -429,6 +553,84 @@
                         alert("Не вдалося додати павільон.");
                     }
                 });
+            };
+
+            window.showEditPavilionForm = function (pavilionId) {
+                $.ajax({
+                    url: `@Url.Action("GetPavilionById", "Parks")?id=${pavilionId}`,
+                    type: 'GET',
+                    success: function (data) {
+                        $('#editPavilionForm').remove();
+                        const formHtml = `
+                        <div id="editPavilionForm" class="mt-3">
+                            <h4>Редагувати павільон</h4>
+                            <input type="hidden" id="editPavilionId" value="${data.id}">
+                            <input type="number" id="editPavilionParkId" class="form-control mb-2" value="${data.parkId}" placeholder="ID парка">
+                            <input type="text" id="editPavilionName" class="form-control mb-2" value="${data.name}" placeholder="Назва павільону">
+                            <input type="text" id="editPavilionType" class="form-control mb-2" value="${data.type}" placeholder="Тип павільону">
+                            <input type="number" id="editPavilionSquare" class="form-control mb-2" value="${data.square}" placeholder="Площа">
+                            <button class="btn btn-primary" onclick="submitEditPavilion()">Зберегти зміни</button>
+                        </div>
+                    `;
+                        $('#result').append(formHtml);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка отримання даних павільону: ", error);
+                        alert("Не вдалося завантажити дані павільону.");
+                    }
+                });
+            };
+
+            window.submitEditPavilion = function () {
+                const pavilionId = $('#editPavilionId').val();
+                const parkId = $('#editPavilionParkId').val();
+                const name = $('#editPavilionName').val();
+                const type = $('#editPavilionType').val();
+                const square = $('#editPavilionSquare').val();
+
+                if (!pavilionId || !parkId || !name || !type || !square) {
+                    alert("Будь ласка, заповніть усі поля.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ChangePavilion", "Parks")',
+                    type: 'POST',
+                    data: {
+                        PavilionId: pavilionId,
+                        ParkId: parkId,
+                        Name: name,
+                        Type: type,
+                        Square: square
+                    },
+                    success: function () {
+                        alert("Павільон успішно змінено!");
+                        $('#editPavilionForm').remove();
+                        loadSection('pavilions');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка при зміні павільону: ", error);
+                        alert("Не вдалося змінити павільон.");
+                    }
+                });
+            };
+
+            window.deletePavilion = function (pavilionId) {
+                if (confirm("Ви впевнені, що хочете видалити цей павільон?")) {
+                    $.ajax({
+                        url: '@Url.Action("DeletePavilion", "Parks")',
+                        type: 'POST',
+                        data: { id: pavilionId },
+                        success: function () {
+                            alert("Павільон успішно видалено!");
+                            loadSection('pavilions');
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Помилка при видаленні павільону: ", error);
+                            alert("Не вдалося видалити павільон.");
+                        }
+                    });
+                }
             };
 
         });

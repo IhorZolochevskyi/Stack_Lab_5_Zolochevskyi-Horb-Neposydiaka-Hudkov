@@ -136,7 +136,7 @@ namespace lab5.Controllers
         }
 
         [HttpPost]
-        public IActionResult ChangeParks(int parkId, string name, decimal square, string location)
+        public IActionResult ChangePark(int parkId, string name, decimal square, string location)
         {
             var park = _db.Parks.FirstOrDefault(p => p.Id == parkId);
             if (park == null)
@@ -147,6 +147,21 @@ namespace lab5.Controllers
             park.Square = square;
             park.Location = location;
             _db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult DeletePark(int id)
+        {
+            var park = _db.Parks.Find(id);
+            if (park == null)
+            {
+                return NotFound();
+            }
+
+            _db.Parks.Remove(park);
+            _db.SaveChanges();
+
             return Ok();
         }
 
@@ -174,18 +189,34 @@ namespace lab5.Controllers
         }
 
         [HttpPost]
-        public IActionResult ChangePlanting(int plantingId, string cultureType, string name, int averageLifetime, int quantity)
+        public IActionResult ChangePlanting(int plantingId, int parkId, string cultureType, string name, int averageLifetime, int quantity)
         {
             var planting = _db.Plantings.FirstOrDefault(p => p.Id == plantingId);
             if (planting == null)
             {
                 return NotFound();
             }
+            planting.ParkId = parkId;
             planting.CultureType = cultureType;
             planting.Name = name;
             planting.AverageLifetime = averageLifetime;
             planting.Quantity = quantity;
             _db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult DeletePlanting(int id)
+        {
+            var planting = _db.Plantings.Find(id);
+            if (planting == null)
+            {
+                return NotFound();
+            }
+
+            _db.Plantings.Remove(planting);
+            _db.SaveChanges();
+
             return Ok();
         }
 
@@ -214,19 +245,35 @@ namespace lab5.Controllers
         }
 
         [HttpPost]
-        public IActionResult ChangeFountain(int fountainId, int code, DateTime buildDate, decimal maxWaterConsumption, decimal normalWaterConsumption, decimal square)
+        public IActionResult ChangeFountain(int fountainId, int parkId, int code, DateTime buildDate, decimal maxWaterConsumption, decimal normalWaterConsumption, decimal square)
         {
             var fountain = _db.Fountains.FirstOrDefault(p => p.Id == fountainId);
             if (fountain == null)
             {
                 return NotFound();
             }
+            fountain.ParkId = parkId;
             fountain.Code = code;
             fountain.BuildDate = buildDate;
             fountain.MaxWaterConsumption = maxWaterConsumption;
             fountain.NormalWaterConsumption = normalWaterConsumption;
             fountain.Square = square;
             _db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult DeleteFountain(int id)
+        {
+            var fountain = _db.Fountains.Find(id);
+            if (fountain == null)
+            {
+                return NotFound();
+            }
+
+            _db.Fountains.Remove(fountain);
+            _db.SaveChanges();
+
             return Ok();
         }
 
@@ -253,17 +300,33 @@ namespace lab5.Controllers
         }
 
         [HttpPost]
-        public IActionResult ChangePavilion(int pavilionId, string name, string type, decimal square)
+        public IActionResult ChangePavilion(int pavilionId, int parkId, string name, string type, decimal square)
         {
             var pavilion = _db.Pavilions.FirstOrDefault(p => p.Id == pavilionId);
             if (pavilion == null)
             {
                 return NotFound();
             }
+            pavilion.ParkId = parkId;
             pavilion.Name = name;
             pavilion.Type = type;
             pavilion.Square = square;
             _db.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult DeletePavilion(int id)
+        {
+            var pavilion = _db.Pavilions.Find(id);
+            if (pavilion == null)
+            {
+                return NotFound();
+            }
+
+            _db.Pavilions.Remove(pavilion);
+            _db.SaveChanges();
+
             return Ok();
         }
     }
