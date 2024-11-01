@@ -3,10 +3,10 @@
 }
 
 <div class="text-center">
-    <button id="loadClients" class="btn btn-primary">Показать всех клиентов</button>
-    <button id="loadCars" class="btn btn-primary">Показать все машины</button>
-    <button id="loadDocuments" class="btn btn-primary">Показать все документы</button>
-    <button id="loadAvailableCarModels" class="btn btn-primary">Показать доступные модели машин</button>
+    <button id="loadClients" class="btn btn-primary">Показати всіх клієнтів</button>
+    <button id="loadCars" class="btn btn-primary">Показати всі машини</button>
+    <button id="loadDocuments" class="btn btn-primary">Показати всі документи</button>
+    <button id="loadAvailableCarModels" class="btn btn-primary">Показати доступні моделі машин</button>
 </div>
 
 <div id="result" class="mt-4"></div>
@@ -15,47 +15,88 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
-            function appendActionButtons() {
-                return `
-                                    <div class="mt-3" id="actionButtons">
-                                        <button class="btn btn-success" id="addClientButton">Добавить клиента</button>
-                                        <button class="btn btn-success" id="addCarButton">Добавить машину</button>
-                                        <button class="btn btn-warning" onclick="editItem()">Изменить</button>
-                                        <button class="btn btn-danger" onclick="deleteItem()">Удалить</button>
-                                    </div>
-                                `;
+            function appendActionButtons(type) {
+                let buttonsHtml = '<div class="mt-3" id="actionButtons">';
+                if (type === 'clients') {
+                    buttonsHtml += '<button class="btn btn-success" id="addClientButton">Додати клієнта</button>';
+                } else if (type === 'cars') {
+                    buttonsHtml += '<button class="btn btn-success" id="addCarButton">Додати машину</button>';
+                } else if (type === 'documents') {
+                    buttonsHtml += '<button class="btn btn-success" id="addDocumentButton">Додати документ</button>';
+                }
+                buttonsHtml += '</div>';
+                return buttonsHtml;
             }
 
             function showAddClientForm() {
-                $('#addCarForm').remove(); // Убираем форму добавления машины, если она есть
-                $('#addClientForm').remove(); // Убираем предыдущую форму, если она уже есть
+                $('#addCarForm').remove();
+                $('#addClientForm').remove();
+                $('#addDocumentForm').remove();
 
                 const formHtml = `
-                                    <div id="addClientForm" class="mt-3">
-                                        <h4>Добавить клиента</h4>
-                                        <input type="text" id="clientName" class="form-control mb-2" placeholder="Имя">
-                                        <input type="number" id="clientAge" class="form-control mb-2" placeholder="Возраст">
-                                        <button class="btn btn-primary" onclick="submitClient()">Сохранить</button>
-                                    </div>
-                                `;
+                        <div id="addClientForm" class="mt-3">
+                            <h4>Додати клієнта</h4>
+                            <input type="text" id="clientName" class="form-control mb-2" placeholder="Ім'я">
+                            <input type="number" id="clientAge" class="form-control mb-2" placeholder="Вік">
+                            <button class="btn btn-primary" onclick="submitClient()">Зберегти</button>
+                        </div>
+                    `;
                 $('#actionButtons').after(formHtml);
             }
 
             function showAddCarForm() {
-                $('#addClientForm').remove(); // Убираем форму добавления клиента, если она есть
-                $('#addCarForm').remove(); // Убираем предыдущую форму, если она уже есть
+                $('#addClientForm').remove();
+                $('#addCarForm').remove();
+                $('#addDocumentForm').remove();
 
                 const formHtml = `
-                                    <div id="addCarForm" class="mt-3">
-                                        <h4>Добавить машину</h4>
-                                        <input type="text" id="carBrand" class="form-control mb-2" placeholder="Марка">
-                                        <input type="text" id="carModel" class="form-control mb-2" placeholder="Модель">
-                                        <input type="text" id="carNumber" class="form-control mb-2" placeholder="Номер">
-                                        <input type="number" id="carPrice" class="form-control mb-2" placeholder="Цена за день">
-                                        <button class="btn btn-primary" onclick="submitCar()">Сохранить</button>
-                                    </div>
-                                `;
+                        <div id="addCarForm" class="mt-3">
+                            <h4>Додати машину</h4>
+                            <input type="text" id="carBrand" class="form-control mb-2" placeholder="Марка">
+                            <input type="text" id="carModel" class="form-control mb-2" placeholder="Модель">
+                            <input type="text" id="carNumber" class="form-control mb-2" placeholder="Номер">
+                            <input type="number" id="carPrice" class="form-control mb-2" placeholder="Ціна за день">
+                            <button class="btn btn-primary" onclick="submitCar()">Зберегти</button>
+                        </div>
+                    `;
                 $('#actionButtons').after(formHtml);
+            }
+
+            function showAddDocumentForm() {
+                $('#addClientForm').remove();
+                $('#addCarForm').remove();
+                $('#addDocumentForm').remove();
+
+                $.when(
+                    $.ajax({ url: '@Url.Action("GetAllClients", "carRent")', type: 'GET' }),
+                    $.ajax({ url: '@Url.Action("GetAllCars", "carRent")', type: 'GET' })
+                ).done(function (clientsData, carsData) {
+                    let clientsOptions = '';
+                    $.each(clientsData[0], function (index, client) {
+                        clientsOptions += `<option value="${client.name}">${client.name}</option>`;
+                    });
+
+                    let carsOptions = '';
+                    $.each(carsData[0], function (index, car) {
+                        if (!car.isRented) {
+                            carsOptions += `<option value="${car.carNumber}">${car.brand} ${car.model} (${car.carNumber})</option>`;
+                        }
+                    });
+
+                    const formHtml = `
+                            <div id="addDocumentForm" class="mt-3">
+                                <h4>Додати документ</h4>
+                                <select id="documentClientName" class="form-control mb-2">${clientsOptions}</select>
+                                <select id="documentCarNumber" class="form-control mb-2">${carsOptions}</select>
+                                <input type="date" id="documentStartDate" class="form-control mb-2" placeholder="Дата початку">
+                                <input type="date" id="documentEndDate" class="form-control mb-2" placeholder="Дата кінця">
+                                <button class="btn btn-primary" onclick="submitDocument()">Зберегти</button>
+                            </div>
+                        `;
+                    $('#actionButtons').after(formHtml);
+                }).fail(function () {
+                    alert("Помилка завантаження даних для форми");
+                });
             }
 
             $('#loadClients').click(function () {
@@ -63,21 +104,26 @@
                     url: '@Url.Action("GetAllClients", "carRent")',
                     type: 'GET',
                     success: function (data) {
-                        let html = '<h2>Список клиентов</h2><table class="table"><thead><tr><th>Имя</th><th>Возраст</th></tr></thead><tbody>';
+                        let html = "<h2>Список клієнтів</h2><table class='table'><thead><tr><th>Ім'я</th><th>Вік</th><th>Дії</th></tr></thead><tbody>";
                         $.each(data, function (index, client) {
-                            html += '<tr><td>' + client.name + '</td><td>' + client.age + '</td></tr>';
+                            html += '<tr><td>' + client.name + '</td><td>' + client.age + '</td><td>' +
+                                '<button class="btn btn-danger deleteClient" data-client-id="' + client.id + '">Видалити клієнта</button></td></tr>';
                         });
                         html += '</tbody></table>';
-                        html += appendActionButtons();
+                        html += appendActionButtons('clients');
                         $('#result').html(html);
 
-                        // Добавляем событие для кнопки "Добавить клиента" после загрузки HTML
                         $('#addClientButton').click(showAddClientForm);
-                        $('#addCarButton').remove(); // Убираем кнопку "Добавить машину"
+                        $('.deleteClient').click(function () {
+                            const clientId = $(this).data('client-id');
+                            if (confirm("Точно хочете видалити клієнта? \nЦе призведе до видалення всіх документів із цим клієнтом")) {
+                                deleteClient(clientId);
+                            }
+                        });
                     },
                     error: function (xhr, status, error) {
                         console.error(error);
-                        $('#result').html('<p>Ошибка загрузки клиентов.</p>');
+                        $('#result').html('<p>Помилка завантаження клієнтів</p>');
                     }
                 });
             });
@@ -87,110 +133,63 @@
                     url: '@Url.Action("GetAllCars", "carRent")',
                     type: 'GET',
                     success: function (data) {
-                        let html = '<h2>Список машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Номер</th><th>Цена за день</th></tr></thead><tbody>';
+                        let html = '<h2>Список машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Номер</th><th>Ціна за день</th><th>Дії</th></tr></thead><tbody>';
                         $.each(data, function (index, car) {
-                            html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>' + car.carNumber + '</td><td>' + car.pricePerDay + '</td></tr>';
+                            html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>' + car.carNumber + '</td><td>' + car.pricePerDay + '</td><td>' +
+                                '<button class="btn btn-warning EditCar">Змінити параметри авто</button> ' +
+                                '<button class="btn btn-danger deleteCar" data-car-id="' + car.id + '">Видалити машину</button></td></tr>';
                         });
                         html += '</tbody></table>';
-                        html += appendActionButtons();
+                        html += appendActionButtons('cars');
                         $('#result').html(html);
 
-                        // Добавляем событие для кнопки "Добавить машину" после загрузки HTML
                         $('#addCarButton').click(showAddCarForm);
-                        $('#addClientButton').remove(); // Убираем кнопку "Добавить клиента"
+                        $('.deleteCar').click(function () {
+                            const carId = $(this).data('car-id');
+                            if (confirm("Точно хочете видалити машину? \nЦе призведе до видалення всіх документів із цією машиною")) {
+                                deleteCar(carId);
+                            }
+                        });
                     },
                     error: function (xhr, status, error) {
                         console.error(error);
-                        $('#result').html('<p>Ошибка загрузки машин.</p>');
+                        $('#result').html('<p>Помилка завантаження машин</p>');
                     }
                 });
             });
-
-            // Функция для добавления клиента
-            window.submitClient = function () {
-                const name = $('#clientName').val();
-                const age = $('#clientAge').val();
-
-                if (!name || !age) {
-                    alert("Пожалуйста, заполните все поля.");
-                    return;
-                }
-
-                $.ajax({
-                    url: '@Url.Action("AddClient", "carRent")', // URL метода AddClient
-                    type: 'POST',
-                    data: {
-                        Name: name,
-                        age: age
-                    },
-                    success: function () {
-                        alert("Клиент успешно добавлен!");
-                        $('#addClientForm').remove(); // Убираем форму после успешного добавления
-                        $('#loadClients').click(); // Обновляем список клиентов
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Ошибка при добавлении клиента: ", error);
-                        alert("Не удалось добавить клиента.");
-                    }
-                });
-            };
-
-            // Функция для добавления машины
-            window.submitCar = function () {
-                const brand = $('#carBrand').val();
-                const model = $('#carModel').val();
-                const carNumber = $('#carNumber').val();
-                const pricePerDay = $('#carPrice').val();
-
-                if (!brand || !model || !carNumber || !pricePerDay) {
-                    alert("Пожалуйста, заполните все поля.");
-                    return;
-                }
-
-                $.ajax({
-                    url: '@Url.Action("AddCar", "carRent")', // URL метода AddCar
-                    type: 'POST',
-                    data: {
-                        brand: brand,
-                        model: model,
-                        carNumber: carNumber,
-                        pricePerDay: pricePerDay
-                    },
-                    success: function () {
-                        alert("Машина успешно добавлена!");
-                        $('#addCarForm').remove(); // Убираем форму после успешного добавления
-                        $('#loadCars').click(); // Обновляем список машин
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Ошибка при добавлении машины: ", error);
-                        alert("Не удалось добавить машину.");
-                    }
-                });
-            };
 
             $('#loadDocuments').click(function () {
                 $.ajax({
                     url: '@Url.Action("GetAllDocuments", "carRent")',
                     type: 'GET',
                     success: function (data) {
-                        let html = '<h2>Список документов</h2><table class="table"><thead><tr><th>ID</th><th>Имя клиента</th><th>Марка машины</th><th>Модель машины</th><th>Номер машины</th><th>Дата начала</th><th>Дата конца</th></tr></thead><tbody>';
+                        let html = "<h2>Список документів</h2><table class='table'><thead><tr><th>ID</th><th>Ім'я клиента</th><th>Марка машины</th><th>Модель машины</th><th>Номер машины</th><th>Дата початку</th><th>Дата кінця</th><th>Дії</th></tr></thead><tbody>";
                         $.each(data, function (index, document) {
                             html += '<tr>' +
-                                '<td>' + document.id + '</td>' + // ID документа
+                                '<td>' + document.id + '</td>' +
                                 '<td>' + document.client.name + '</td>' +
                                 '<td>' + document.car.brand + '</td>' +
                                 '<td>' + document.car.model + '</td>' +
-                                '<td>' + document.car.carNumber + '</td>' + // Номер машины
-                                '<td>' + new Date(document.startDate).toLocaleDateString() + '</td>' + // Дата начала
-                                '<td>' + new Date(document.endDate).toLocaleDateString() + '</td>' + // Дата конца
-                                '</tr>';
+                                '<td>' + document.car.carNumber + '</td>' +
+                                '<td>' + new Date(document.startDate).toLocaleDateString() + '</td>' +
+                                '<td>' + new Date(document.endDate).toLocaleDateString() + '</td>' +
+                                '<td><button class="btn btn-danger deleteDocument" data-document-id="' + document.id + '">Видалити документ</button></td></tr>';
                         });
                         html += '</tbody></table>';
+                        html += appendActionButtons('documents');
                         $('#result').html(html);
+
+                        $('#addDocumentButton').click(showAddDocumentForm);
+                        $('.deleteDocument').click(function () {
+                            const documentId = $(this).data('document-id');
+                            if (confirm("Точно хочете видалити документ?")) {
+                                deleteDocument(documentId);
+                            }
+                        });
                     },
                     error: function (xhr, status, error) {
                         console.error(error);
-                        $('#result').html('<p>Ошибка загрузки документов.</p>');
+                        $('#result').html('<p>Помилка завантаження документів</p>');
                     }
                 });
             });
@@ -200,19 +199,281 @@
                     url: '@Url.Action("GetAvailableCarModels", "carRent")',
                     type: 'GET',
                     success: function (data) {
-                        let html = '<h2>Доступные модели машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th></tr></thead><tbody>';
+                        let html = '<h2>Доступні моделі машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Ціна за день</th></tr></thead><tbody>';
                         $.each(data, function (index, model) {
-                            html += '<tr><td>' + model.brand + '</td><td>' + model.model + '</td></tr>';
+                            html += '<tr><td>' + model.brand + '</td><td>' + model.model + '</td><td>' + model.pricePerDay + '</td></tr>';
                         });
                         html += '</tbody></table>';
                         $('#result').html(html);
                     },
                     error: function (xhr, status, error) {
                         console.error(error);
-                        $('#result').html('<p>Ошибка загрузки моделей машин.</p>');
+                        $('#result').html('<p>Помилка завантаження моделей машин</p>');
                     }
                 });
             });
+
+            window.submitClient = function () {
+                const name = $('#clientName').val();
+                const age = $('#clientAge').val();
+
+                if (!name || !age) {
+                    alert("Будь ласка, заповніть усі поля!");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddClient", "carRent")',
+                    type: 'POST',
+                    data: {
+                        Name: name,
+                        age: age
+                    },
+                    success: function () {
+                        alert("Клієнт успішно доданий!");
+                        $('#addClientForm').remove();
+                        $('#loadClients').click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час додавання клієнта: ", error);
+                        alert("Не вдалося додати клієнта!");
+                    }
+                });
+            };
+
+            window.submitCar = function () {
+                const brand = $('#carBrand').val();
+                const model = $('#carModel').val();
+                const carNumber = $('#carNumber').val();
+                const pricePerDay = $('#carPrice').val();
+
+                if (!brand || !model || !carNumber || !pricePerDay) {
+                    alert("Будь ласка, заповніть усі поля!");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddCar", "carRent")',
+                    type: 'POST',
+                    data: {
+                        brand: brand,
+                        model: model,
+                        carNumber: carNumber,
+                        pricePerDay: pricePerDay
+                    },
+                    success: function () {
+                        alert("Машину успішно додано!");
+                        $('#addCarForm').remove();
+                        $('#loadCars').click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час додавання машини: ", error);
+                        alert("Не вдалося додати машину!");
+                    }
+                });
+            };
+
+            window.submitDocument = function () {
+                const clientName = $('#documentClientName').val();
+                const carNumber = $('#documentCarNumber').val();
+                const startDate = $('#documentStartDate').val();
+                const endDate = $('#documentEndDate').val();
+
+                if (!clientName || !carNumber || !startDate || !endDate) {
+                    alert("Будь ласка, заповніть усі поля!");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddDocument", "carRent")',
+                    type: 'POST',
+                    data: {
+                        clientName: clientName,
+                        carNumber: carNumber,
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function () {
+                        alert("Документ успішно додано!");
+                        $('#addDocumentForm').remove();
+                        $('#loadDocuments').click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час додавання документа: ", error);
+                        console.error("Відповідь сервера: ", xhr.responseText);
+                        alert("Не вдалося видалити документ");
+                    }
+                });
+            };
+
+            function deleteClient(clientId) {
+                $.ajax({
+                    url: '@Url.Action("DeleteClient", "carRent")',
+                    type: 'POST',
+                    data: { id: clientId },
+                    success: function () {
+                        alert("Клієнта успішно видалено!");
+                        $('#loadClients').click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час видалення клієнта: ", error);
+                        alert("Не вдалося видалити клієнта");
+                    }
+                });
+            }
+
+            $('.deleteCar').click(function () {
+                const carId = $(this).data('car-id');
+                console.log("Видалення машини з id:", carId);
+                if (confirm("Точно хочете видалити машину?")) {
+                    deleteCar(carId);
+                }
+            });
+
+            function deleteCar(carId) {
+                $.ajax({
+                    url: '@Url.Action("DeleteCar", "carRent")',
+                    type: 'POST',
+                    data: { id: carId },
+                    success: function () {
+                        alert("Машину успішно видалено!");
+                        $('#loadCars').click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час видалення машини: ", error);
+                        console.error("Відповідь сервера ", xhr.responseText);
+                        alert("Не вдалося видалити машину. Помилка: " + xhr.responseText);
+                    }
+                });
+            }
+
+            function deleteDocument(documentId) {
+                $.ajax({
+                    url: '@Url.Action("DeleteDocument", "carRent")',
+                    type: 'POST',
+                    data: { id: documentId },
+                    success: function () {
+                        alert("Документ успішно видалено!");
+                        $('#loadDocuments').click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час видалення документа: ", error);
+                        alert("Не вдалося видалити документ");
+                    }
+                });
+            }
+
+            function editCar(carId, brand, model, carNumber, pricePerDay) {
+                $.ajax({
+                    url: '/carRent/EditCar',
+                    type: 'POST',
+                    data: {
+                        id: carId,
+                        brand: brand,
+                        model: model,
+                        carNumber: carNumber,
+                        pricePerDay: pricePerDay
+                    },
+                    success: function () {
+                        alert("Параметри машини успішно оновлено!");
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час редагування машини: ", error);
+                        console.error("Відповідь сервера: ", xhr.responseText);
+                        alert("Не вдалося оновити параметри машини. Помилка: " + xhr.responseText);
+                    }
+                });
+            }
+
+            function showEditCarForm(car) {
+                $('#addClientForm').remove();
+                $('#addCarForm').remove();
+                $('#addDocumentForm').remove();
+                $('#editCarForm').remove();
+
+                const formHtml = `
+                            <div id="editCarForm" class="mt-3">
+                                <h4>Змінити параметри машини</h4>
+                                <input type="hidden" id="editCarId" value="${car.id}">
+                                <input type="text" id="editCarBrand" class="form-control mb-2" placeholder="Марка" value="${car.brand}">
+                                <input type="text" id="editCarModel" class="form-control mb-2" placeholder="Модель" value="${car.model}">
+                                <input type="text" id="editCarNumber" class="form-control mb-2" placeholder="Номер" value="${car.carNumber}">
+                                <input type="number" id="editCarPrice" class="form-control mb-2" placeholder="Ціна за день" value="${car.pricePerDay}">
+                                <button class="btn btn-primary" onclick="submitEditCar()">Зберегти</button>
+                            </div>
+                        `;
+                $('#actionButtons').after(formHtml);
+            }
+
+            $('#loadCars').click(function () {
+                $.ajax({
+                    url: '@Url.Action("GetAllCars", "carRent")',
+                    type: 'GET',
+                    success: function (data) {
+                        let html = '<h2>Список машин</h2><table class="table"><thead><tr><th>Марка</th><th>Модель</th><th>Номер</th><th>Ціна за день</th><th>Дії</th></tr></thead><tbody>';
+                        $.each(data, function (index, car) {
+                            html += '<tr><td>' + car.brand + '</td><td>' + car.model + '</td><td>' + car.carNumber + '</td><td>' + car.pricePerDay + '</td><td>' +
+                                '<button class="btn btn-warning editCar" data-car-id="' + car.id + '">Змінити параметри авто</button> ' +
+                                '<button class="btn btn-danger deleteCar" data-car-id="' + car.id + '">Видалити машину</button></td></tr>';
+                        });
+                        html += '</tbody></table>';
+                        html += appendActionButtons('cars');
+                        $('#result').html(html);
+
+                        $('#addCarButton').click(showAddCarForm);
+                        $('.deleteCar').click(function () {
+                            const carId = $(this).data('car-id');
+                            if (confirm("Точно хочете видалити машину? \nЦе призведе до видалення всіх документів із цією машиною")) {
+                                deleteCar(carId);
+                            }
+                        });
+                        $('.editCar').click(function () {
+                            const carId = $(this).data('car-id');
+                            const car = data.find(c => c.id === carId);
+                            showEditCarForm(car);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        $('#result').html('<p>Помилка завантаження машин</p>');
+                    }
+                });
+            });
+
+            window.submitEditCar = function () {
+                const carId = $('#editCarId').val();
+                const brand = $('#editCarBrand').val();
+                const model = $('#editCarModel').val();
+                const carNumber = $('#editCarNumber').val();
+                const pricePerDay = $('#editCarPrice').val();
+
+                if (!brand || !model || !carNumber || !pricePerDay) {
+                    alert("Будь ласка, заповніть усі поля!");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("EditCar", "carRent")',
+                    type: 'POST',
+                    data: {
+                        id: carId,
+                        brand: brand,
+                        model: model,
+                        carNumber: carNumber,
+                        pricePerDay: pricePerDay
+                    },
+                    success: function () {
+                        alert("Параметри машини успішно оновлено!");
+                        $('#editCarForm').remove();
+                        $('#loadCars').click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Помилка під час редагування машини: ", error);
+                        console.error("Відповідь сервера: ", xhr.responseText);
+                        alert("Не вдалося оновити параметри машини. Помилка: " + xhr.responseText);
+                    }
+                });
+            };
         });
     </script>
 }
