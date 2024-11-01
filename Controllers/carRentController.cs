@@ -159,11 +159,10 @@ namespace lab5.Controllers
                 return NotFound();
             }
 
-            // Удаляем все документы клиента и освобождаем машины
             foreach (var document in client.Documents)
             {
                 var car = document.car;
-                car.isRented = false; // Освобождаем машину
+                car.isRented = false;
                 _db.Documents.Remove(document);
             }
 
@@ -186,7 +185,6 @@ namespace lab5.Controllers
                         return NotFound($"Машину з id {id} не знайдено.");
                     }
 
-                    // Удаление всех связанных документов
                     var documents = _db.Documents.Where(d => d.car.Id == id).ToList();
                     foreach (var document in documents)
                     {
@@ -217,7 +215,7 @@ namespace lab5.Controllers
             }
 
             var car = document.car;
-            car.isRented = false; // Освобождаем машину
+            car.isRented = false;
 
             _db.Documents.Remove(document);
             _db.SaveChanges();
