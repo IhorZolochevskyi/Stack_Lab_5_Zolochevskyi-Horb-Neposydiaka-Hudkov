@@ -153,20 +153,17 @@ namespace lab5.Controllers
         [HttpPost]
         public IActionResult DeleteClient(int id)
         {
-            var client = _db.Clients.FirstOrDefault(c => c.Id == id);
+            var client = _db.Clients.Include(c => c.Documents).ThenInclude(d => d.car).FirstOrDefault(c => c.Id == id);
             if (client == null)
             {
-                return NotFound("Клієнт не знайдений");
+                return NotFound();
             }
 
-            var documents = _db.Documents.Where(d => d.client.Id == id).ToList();
-            foreach (var document in documents)
+            // Удаляем все документы клиента и освобождаем машины
+            foreach (var document in client.Documents)
             {
                 var car = document.car;
-                if (car != null)
-                {
-                    car.isRented = false;
-                }
+                car.isRented = false; // Освобождаем машину
                 _db.Documents.Remove(document);
             }
 
@@ -216,20 +213,18 @@ namespace lab5.Controllers
             var document = _db.Documents.Include(d => d.car).FirstOrDefault(d => d.Id == id);
             if (document == null)
             {
-                return NotFound("Документ не знайдено");
+                return NotFound();
             }
 
             var car = document.car;
-            if (car != null)
-            {
-                car.isRented = false;
-            }
+            car.isRented = false; // Освобождаем машину
 
             _db.Documents.Remove(document);
             _db.SaveChanges();
 
             return Ok();
         }
+
 
         [HttpPost]
         public IActionResult EditCar(int Id, string brand, string model, string carNumber, decimal pricePerDay)
