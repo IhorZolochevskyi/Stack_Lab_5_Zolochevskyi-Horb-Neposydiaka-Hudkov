@@ -201,7 +201,7 @@
                     success: function () {
                         alert("Парк успішно доданий!");
                         $('#addParkForm').remove();
-                        loadSection('parks'); // Виклик функції завантаження парків
+                        loadSection('parks'); 
                     },
                     error: function (xhr, status, error) {
                         console.error("Помилка при додаванні парку: ", error);
@@ -212,7 +212,7 @@
 
             window.showEditParkForm = function (parkId) {
                 $.ajax({
-                    url: `@Url.Action("GetParkById", "Parks")?id=${parkId}`,  // Вызываем метод для получения парка по ID
+                    url: `@Url.Action("GetParkById", "Parks")?id=${parkId}`,
                     type: 'GET',
                     success: function (data) {
                         $('#editParkForm').remove();
@@ -235,7 +235,7 @@
                 });
             };
 
-            // Функція для збереження змінених даних парку
+
             window.submitEditPark = function () {
                 const parkId = $('#editParkId').val();
                 const name = $('#editParkName').val();
@@ -312,7 +312,7 @@
                     success: function () {
                         alert("Насадження успішно додано!");
                         $('#addPlantingForm').remove();
-                        loadSection('plantings'); // Виклик функції завантаження насаджень
+                        loadSection('plantings'); 
                     },
                     error: function (xhr, status, error) {
                         console.error("Помилка при додаванні насадження: ", error);
@@ -323,7 +323,7 @@
 
             window.showEditPlantingForm = function (plantingId) {
             $.ajax({
-                url: `@Url.Action("GetPlantingById", "Parks")?id=${plantingId}`,  // Вызываем метод для получения насаждения по ID
+                url: `@Url.Action("GetPlantingById", "Parks")?id=${plantingId}`,  
                 type: 'GET',
                 success: function (data) {
                     $('#editPlantingForm').remove();
@@ -348,7 +348,7 @@
             });
         };
 
-        // Функція для збереження змінених даних насадження
+
         window.submitEditPlanting = function () {
             const plantingId = $('#editPlantingId').val();
             const parkId = $('#editPlantingParkId').val();
@@ -430,7 +430,7 @@
                     success: function () {
                         alert("Фонтан успішно доданий!");
                         $('#addFountainForm').remove();
-                        loadSection('fountains'); // Виклик функції завантаження фонтанів
+                        loadSection('fountains');
                     },
                     error: function (xhr, status, error) {
                         console.error("Помилка при додаванні фонтану: ", error);
