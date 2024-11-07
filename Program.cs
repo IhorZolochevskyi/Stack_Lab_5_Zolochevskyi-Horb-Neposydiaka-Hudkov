@@ -1,4 +1,3 @@
-using lab5.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;      // Для IApplicationBuilder
 using Microsoft.AspNetCore.Hosting;      // Для IWebHostEnvironment
-using Microsoft.AspNetCore.Routing;      // Для MapControllerRoute
+using Microsoft.AspNetCore.Routing;
+using lab5.Services;      // Для MapControllerRoute
 
 namespace lab5
 {

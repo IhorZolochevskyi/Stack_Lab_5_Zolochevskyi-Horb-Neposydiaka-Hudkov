@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using lab5.Models;
 using Microsoft.EntityFrameworkCore;
+using lab5.Services;
 
 namespace lab5.Controllers
 {
@@ -329,5 +330,12 @@ namespace lab5.Controllers
 
             return Ok();
         }
+
+        public IActionResult Graph()
+        {
+            return View("~/Views/Graph.cshtml");
+        }
+
+
     }
 }

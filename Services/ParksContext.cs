@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using lab5.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace lab5.Models
+namespace lab5.Services
 {
     public class ParksContext : DbContext
     {
-        public ParksContext(DbContextOptions<ParksContext> options): base(options)
+        public ParksContext(DbContextOptions<ParksContext> options) : base(options)
         {
-        Database.EnsureCreated();
+            Database.EnsureCreated();
         }
 
         public DbSet<Park> Parks { get; set; }

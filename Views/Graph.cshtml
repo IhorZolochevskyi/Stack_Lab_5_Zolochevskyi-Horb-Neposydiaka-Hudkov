@@ -1,0 +1,63 @@
+﻿<html>
+<head>
+    <!-- Подключение jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
+    <!-- Подключение локального файла dygraph.min.js -->
+    <script src="~/lib/jquery/dist/dygraph.min.js"></script>
+
+    <script>
+        // Создание объекта Date из строки
+        function parseDateTime(dt) {
+            var year = dt.substring(0, 4);
+            var month = dt.substring(5, 7);
+            var day = dt.substring(8, 10);
+            var hour = dt.substring(11, 13);
+            var mnt = dt.substring(14, 16);
+            var sec = dt.substring(17, 19);
+            var result = new Date(year, month - 1, day, hour, mnt, sec, 0);
+            return result;
+        }
+
+        $(document).ready(function () {
+            var data = [];  // Данные для отображения на графике
+            var apiUrl = window.location.protocol + "//" + window.location.host + "/SiteVisitors/visitor-stats";  // URL для получения данных
+
+            // Отображаем API URL
+            document.getElementById("demo").innerHTML = "Web API URL: " + apiUrl;
+
+            var g = new Dygraph(document.getElementById("div_g"), data, {
+                drawPoints: true,
+                showRoller: true,
+                valueRange: [0, 120], // Настроить диапазон в зависимости от данных
+                labels: ['Time', 'Visitors'] // Метки для осей
+            });
+
+            window.intervalId = setInterval(function () {
+                $.ajax({
+                    url: apiUrl,
+                    success: function (d) {
+                        console.log(d);
+
+                        data = [];  // Очищаем данные перед обновлением
+                        for (var i = 0; i < d.length; i++) {
+                            var element = d[i];
+                            var x = parseDateTime(element.date);  // Время посещения
+                            var y = parseInt(element.visitorCount);  // Количество посетителей
+                            data.push([x, y]);  // Добавляем данные на график
+                        }
+
+                        // Обновляем график
+                        g.updateOptions({ 'file': data });
+                    }
+                });
+            }, 1000);  // Обновление графика каждую секунду
+        });
+    </script>
+</head>
+<body>
+    <p><div id="demo"></div></p>
+    <div id="div_g" style="width:600px; height:300px;"></div>
+    <p>Новые данные должны появляться каждую секунду.</p>
+</body>
+</html>

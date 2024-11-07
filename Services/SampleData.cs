@@ -1,6 +1,7 @@
 ﻿using System.Linq;
+using lab5.Models;
 
-namespace lab5.Models
+namespace lab5.Services
 {
     public static class SampleData
     {
