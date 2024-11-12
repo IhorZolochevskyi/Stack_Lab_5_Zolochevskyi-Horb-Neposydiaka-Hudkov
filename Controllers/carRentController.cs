@@ -248,5 +248,10 @@ namespace lab5.Controllers
             return Ok();
         }
 
+        public IActionResult Visitors()
+        {
+            return View("~/Views/Visitors.cshtml");
+        } 
+
     }
 }
