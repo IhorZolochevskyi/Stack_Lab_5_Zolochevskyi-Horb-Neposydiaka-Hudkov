@@ -1,0 +1,58 @@
+﻿<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
+    <script src="~/lib/jquery/dist/dygraph.min.js"></script>
+
+    <script>
+        function parseDateTime(dt) {
+            var year = dt.substring(0, 4);
+            var month = dt.substring(5, 7);
+            var day = dt.substring(8, 10);
+            var hour = dt.substring(11, 13);
+            var mnt = dt.substring(14, 16);
+            var sec = dt.substring(17, 19);
+            var result = new Date(year, month - 1, day, hour, mnt, sec, 0);
+            return result;
+        }
+
+        $(document).ready(function () {
+            var data = [];
+            var apiUrl = window.location.protocol + "//" + window.location.host + "/SiteVisitors/visitor-stats"; 
+
+            document.getElementById("demo").innerHTML = "Web API URL: " + apiUrl;
+
+            var g = new Dygraph(document.getElementById("div_g"), data, {
+                drawPoints: true,
+                showRoller: true,
+                valueRange: [0, 120],
+                labels: ['Time', 'Visitors']
+            });
+
+            window.intervalId = setInterval(function () {
+                $.ajax({
+                    url: apiUrl,
+                    success: function (d) {
+                        console.log(d);
+
+                        data = [];
+                        for (var i = 0; i < d.length; i++) {
+                            var element = d[i];
+                            var x = parseDateTime(element.date);
+                            var y = parseInt(element.visitorCount);
+                            data.push([x, y]);
+                        }
+
+                        g.updateOptions({ 'file': data });
+                    }
+                });
+            }, 1000);
+        });
+    </script>
+</head>
+<body>
+    <p><div id="demo"></div></p>
+    <div id="div_g" style="width:600px; height:300px;"></div>
+    <p>Нові дані мають з'являтися щосекунди.</p>
+</body>
+</html>

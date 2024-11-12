@@ -14,21 +14,24 @@ namespace lab5.Models
                         brand = "Audi",
                         model = "A6",
                         carNumber = "BI4171CA",
-                        pricePerDay = 100
+                        pricePerDay = 100,
+                        isRented = false
                     },
                     new Car
                     {
                         brand = "BMW",
                         model = "X5",
                         carNumber = "AX4123KA",
-                        pricePerDay = 99
+                        pricePerDay = 99,
+                        isRented = false
                     },
                     new Car
                     {
                         brand = "BMW",
                         model = "X5",
                         carNumber = "KA1234KA",
-                        pricePerDay = 99
+                        pricePerDay = 99,
+                        isRented = false
                     }
                 );
 
@@ -82,6 +85,11 @@ namespace lab5.Models
                         endDate = DateTime.Now.AddDays(7)
                     }
                 );
+
+                // Обновление статуса аренды автомобилей
+                cars[0].isRented = true;
+                cars[1].isRented = true;
+                cars[2].isRented = true;
 
                 context.SaveChanges();
             }
