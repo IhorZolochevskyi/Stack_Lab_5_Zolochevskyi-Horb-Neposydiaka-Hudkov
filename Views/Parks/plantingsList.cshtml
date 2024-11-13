@@ -1,0 +1,31 @@
+﻿@model IEnumerable<lab5.Models.Planting>
+
+@{
+    ViewData["Title"] = "Список насаджень";
+}
+
+<h2>Список насаджень</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Тип культури</th>
+            <th>Середня тривалість життя</th>
+            <th>Кількість</th>
+            <th>Парк</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var planting in Model)
+        {
+                <tr>
+                    <td>@planting.Name</td>
+                    <td>@planting.CultureType</td>
+                    <td>@planting.AverageLifetime</td>
+                    <td>@planting.Quantity</td>
+                    <td>@planting.Park?.Name ?? "Unknown"</td>
+                </tr>
+        }
+    </tbody>
+</table>

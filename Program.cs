@@ -1,4 +1,3 @@
-using lab5.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;      // Для IApplicationBuilder
 using Microsoft.AspNetCore.Hosting;      // Для IWebHostEnvironment
-using Microsoft.AspNetCore.Routing;      // Для MapControllerRoute
+using Microsoft.AspNetCore.Routing;
+using lab5.Services;      // Для MapControllerRoute
 
 namespace lab5
 {
@@ -24,7 +24,7 @@ namespace lab5
                 try
                 {
                     // Получаем контекст базы данных и инициализируем его
-                    var context = services.GetRequiredService<carRentContext>();
+                    var context = services.GetRequiredService<ParksContext>();
                     SampleData.Initialize(context);
                 }
                 catch (Exception ex)
@@ -50,7 +50,7 @@ namespace lab5
                         string connection = context.Configuration.GetConnectionString("DefaultConnection");
 
                         // Добавление контекста базы данных и контроллеров с представлениями
-                        services.AddDbContext<carRentContext>(options => options.UseSqlServer(connection));
+                        services.AddDbContext<ParksContext>(options => options.UseSqlServer(connection));
                         services.AddControllersWithViews();
                     })
                     .Configure(app =>

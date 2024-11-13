@@ -1,0 +1,32 @@
+﻿@model IEnumerable<lab5.Models.Fountain>
+
+@{
+    ViewData["Title"] = "Список фонтанів";
+}
+<h2>Список фонтанів</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Код</th>
+            <th>Дата будівництва</th>
+            <th>Максимальне споживання води</th>
+            <th>Нормальне споживання води</th>
+            <th>Площа</th
+            <th>Парк</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var fountain in Model)
+        {
+            <tr>
+                <td>@fountain.Code</td>
+                <td>@fountain.BuildDate.ToShortDateString()</td>
+                <td>@fountain.MaxWaterConsumption</td>
+                <td>@fountain.NormalWaterConsumption</td>
+                <td>@fountain.Square</td>
+                <td>@fountain.Park?.Name ?? "Unknown"</td>
+            </tr>
+        }
+    </tbody>
+</table>

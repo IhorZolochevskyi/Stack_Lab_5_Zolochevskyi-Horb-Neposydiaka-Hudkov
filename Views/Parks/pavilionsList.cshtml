@@ -1,0 +1,30 @@
+﻿@model IEnumerable<lab5.Models.Pavilion>
+
+@{
+    ViewData["Title"] = "Список павільонів";
+}
+<h2>Список павільонів</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ідентифікатор</th>
+            <th>Назва</th>
+            <th>Тип</th>
+            <th>Площа</th>
+            <th>Парк</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pavilion in Model)
+        {
+            <tr>
+                <td>@pavilion.Id</td>
+                <td>@pavilion.Name</td>
+                <td>@pavilion.Type</td>
+                <td>@pavilion.Square</td>
+                <td>@pavilion.Park?.Name ?? "Unknown"</td>
+            </tr>
+        }
+    </tbody>
+</table>
